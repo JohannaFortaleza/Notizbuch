@@ -860,7 +860,7 @@ function check(){
 
 /* ===== Benachrichtigung ===== */
 function notify(){
-  const msg="Du verlässt den Spielbereich!";
+  const msg="Du verlässt den Spielbereich! Böse!!";
   const a=$("#alert"); a.textContent=msg; a.style.display="block";
   try{ navigator.vibrate&&navigator.vibrate([300,100,300]); }catch(e){}
   try{ if("Notification" in window && Notification.permission==="granted") new Notification("Spielbereich",{body:msg}); }catch(e){} // nicht überall unterstützt; der rote Balken bleibt als Fallback
