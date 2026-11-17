@@ -687,6 +687,7 @@ button:disabled{opacity:.4}
 <div id="app">
   <div id="alert"></div>
   <div id="bar">
+    <button id="bLang">Deutsch</button>
     <button id="bDraw">Spielbereich zeichnen</button>
     <button id="bUndo" disabled>Punkt zurück</button>
     <button id="bDone" disabled>Fertig</button>
@@ -702,8 +703,8 @@ button:disabled{opacity:.4}
 </div>
 
 <div id="consent"><div>
-  <h3>Standortzugriff</h3>
-  <p>Die App möchte deinen Standort über GPS/GNSS bestimmen, um ihn auf der Karte zu zeigen und dich zu warnen, wenn du den Spielbereich verlässt. Die Daten bleiben auf deinem Gerät. Danach fragt dich noch dein Browser, und ggf. nach der Erlaubnis für Benachrichtigungen.</p>
+  <h3 id="cTitle">Standortzugriff</h3>
+  <p id="cText">Die App möchte deinen Standort über GPS/GNSS bestimmen, um ihn auf der Karte zu zeigen und dich zu warnen, wenn du den Spielbereich verlässt. Die Daten bleiben auf deinem Gerät. Danach fragt dich noch dein Browser, und ggf. nach der Erlaubnis für Benachrichtigungen.</p>
   <button id="cYes">Erlauben</button> <button id="cNo">Abbrechen</button>
 </div></div>
 
@@ -722,6 +723,84 @@ const LS = {
   set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch(e){} }
 };
 
+
+/* ===== Sprachen: Deutsch, Französisch, Löffelsprache ===== */
+const LANGS=["de","fr","lo"];
+const LANG_NAMES={de:"Deutsch",fr:"Français",lo:"Löffelsprache"};
+let lang=LS.get("lang","de"); if(!LANGS.includes(lang)) lang="de";
+const I18N={
+ de:{
+  draw:"Spielbereich zeichnen",undo:"Punkt zurück",done:"Fertig",clear:"Löschen",locStart:"Standort starten",locStop:"Standort stoppen",
+  center:"Zentrieren",test:"Testmodus",map:"Karte",diag:"Diagnose",ready:"Bereit.",
+  cTitle:"Standortzugriff",
+  cText:"Die App möchte deinen Standort über GPS/GNSS bestimmen, um ihn auf der Karte zu zeigen und dich zu warnen, wenn du den Spielbereich verlässt. Die Daten bleiben auf deinem Gerät. Danach fragt dich noch dein Browser, und ggf. nach der Erlaubnis für Benachrichtigungen.",
+  cYes:"Erlauben",cNo:"Abbrechen",
+  sDraw:"Tippe auf die Karte, um die Eckpunkte des Spielbereichs zu setzen. Danach „Fertig“.",
+  sMin3:"Bitte mindestens 3 Punkte setzen.",
+  sSaved:"Spielbereich gespeichert. Starte den Standort, um die Überwachung zu nutzen.",
+  sCleared:"Spielbereich gelöscht.",
+  sTestOn:"Testmodus: Tippe auf die Karte, um eine Position zu simulieren.",sTestOff:"Testmodus aus.",
+  sNoGeo:"Dieses Gerät/dieser Browser unterstützt keine Standortbestimmung.",
+  sWaitGps:"Warte auf GPS-Signal …",
+  e1s:"Standortzugriff wurde verweigert. Bitte in den Browser-Einstellungen für diese Seite erlauben und die Standortdienste des Geräts einschalten.",
+  e1i:"Standortzugriff wurde verweigert. Die Seite läuft nicht über eine sichere Adresse (https). Dann sperrt der Browser den Standort. Bitte die Seite über https aufrufen.",
+  e2:"Position nicht verfügbar. Standortdienste des Geräts einschalten, ggf. ins Freie gehen.",
+  e3:"Zeitüberschreitung bei der Standortbestimmung. Bitte im Freien erneut versuchen.",
+  eX:"Standortfehler.",code:"Code",
+  sStopped:"Standort gestoppt.",
+  pos:"Position",inArea:"im Spielbereich",outArea:"AUSSERHALB des Spielbereichs",noArea:"kein Spielbereich definiert",
+  leave:"Du verlässt den Spielbereich!",notifTitle:"Spielbereich",
+  tOsmFail:"OpenStreetMap-Kacheln nicht ladbar – wechsle zu CARTO.",
+  tNone:"Keine Kartenkacheln ladbar. Bitte Internetverbindung und Browser-Schutzeinstellungen prüfen.",
+  tOsmOnly:"OSM-Kacheln sind nur über eine https-Webadresse erlaubt.",
+  hintOsm:"Hinweis: Die Standard-OSM-Kacheln sind nur bei Aufruf über eine https-Webadresse erlaubt. Hier wird CARTO (ebenfalls OSM-Daten) genutzt.",
+  dAddr:"Adresse",dOrigin:"Herkunft",dSecure:"Sichere Seite (https)",yes:"ja",noSecure:"NEIN – Standort wird gesperrt",osmAllowed:"OSM erlaubt",no:"nein",
+  testing:"Teste Kacheln …",loaded:"geladen",err:"FEHLER",timeout:"Zeitüberschreitung"
+ },
+ fr:{
+  draw:"Dessiner la zone de jeu",undo:"Annuler le point",done:"Terminé",clear:"Effacer",locStart:"Démarrer la position",locStop:"Arrêter la position",
+  center:"Centrer",test:"Mode test",map:"Carte",diag:"Diagnostic",ready:"Prêt.",
+  cTitle:"Accès à la position",
+  cText:"L'application souhaite déterminer votre position via GPS/GNSS afin de l'afficher sur la carte et de vous avertir lorsque vous quittez la zone de jeu. Les données restent sur votre appareil. Ensuite, votre navigateur vous demandera lui aussi l'autorisation, ainsi que, le cas échéant, celle d'envoyer des notifications.",
+  cYes:"Autoriser",cNo:"Annuler",
+  sDraw:"Touchez la carte pour placer les sommets de la zone de jeu, puis « Terminé ».",
+  sMin3:"Veuillez placer au moins 3 points.",
+  sSaved:"Zone de jeu enregistrée. Démarrez la position pour activer la surveillance.",
+  sCleared:"Zone de jeu supprimée.",
+  sTestOn:"Mode test : touchez la carte pour simuler une position.",sTestOff:"Mode test désactivé.",
+  sNoGeo:"Cet appareil ou ce navigateur ne prend pas en charge la géolocalisation.",
+  sWaitGps:"En attente du signal GPS …",
+  e1s:"L'accès à la position a été refusé. Veuillez l'autoriser pour ce site dans les paramètres du navigateur et activer les services de localisation de l'appareil.",
+  e1i:"L'accès à la position a été refusé. La page n'est pas servie via une adresse sécurisée (https), le navigateur bloque donc la position. Veuillez ouvrir la page en https.",
+  e2:"Position indisponible. Activez les services de localisation de l'appareil et, si besoin, sortez à l'extérieur.",
+  e3:"Délai dépassé lors de la localisation. Veuillez réessayer à l'extérieur.",
+  eX:"Erreur de localisation.",code:"Code",
+  sStopped:"Position arrêtée.",
+  pos:"Position",inArea:"dans la zone de jeu",outArea:"HORS de la zone de jeu",noArea:"aucune zone de jeu définie",
+  leave:"Vous quittez la zone de jeu !",notifTitle:"Zone de jeu",
+  tOsmFail:"Tuiles OpenStreetMap indisponibles – passage à CARTO.",
+  tNone:"Aucune tuile de carte ne se charge. Vérifiez la connexion Internet et les paramètres de protection du navigateur.",
+  tOsmOnly:"Les tuiles OSM ne sont autorisées que via une adresse web en https.",
+  hintOsm:"Remarque : les tuiles OSM standard ne sont autorisées que lorsque la page est ouverte via une adresse web en https. CARTO (également basé sur les données OSM) est utilisé ici.",
+  dAddr:"Adresse",dOrigin:"Origine",dSecure:"Page sécurisée (https)",yes:"oui",noSecure:"NON – la position sera bloquée",osmAllowed:"OSM autorisé",no:"non",
+  testing:"Test des tuiles …",loaded:"chargée",err:"ERREUR",timeout:"Délai dépassé"
+ }
+};
+/* Löffelsprache: nach jedem Vokal wird "lew" + derselbe Vokal eingefügt; Doppellaute (ei, ai, au, eu, äu, ie) zählen als ein Vokal.
+   Eigennamen und Abkürzungen bleiben unverändert. */
+const LOE_SKIP=new Set(["OSM","CARTO","GPS","GNSS","https","OpenStreetMap","OpenTopoMap","SRTM"]);
+function loeffel(text){
+  return text.replace(/[A-Za-zÄÖÜäöüß]+/g,w=>{
+    if(LOE_SKIP.has(w)) return w;
+    const caps=w.length>1 && w===w.toUpperCase();
+    return w.replace(/ei|ai|au|eu|äu|ie|[aeiouäöü]/gi,m=>m+(caps?"LEW":"lew")+(caps?m.toUpperCase():m.toLowerCase()));
+  });
+}
+function tr(k){
+  const v=(lang==="fr" && I18N.fr[k]!==undefined) ? I18N.fr[k] : I18N.de[k];
+  return lang==="lo" ? loeffel(v) : v;
+}
+
 /* ===== Karte (OpenStreetMap) ===== */
 const map = L.map("map").setView([51.16,10.45],6); // Startansicht: Deutschland
 /* Kartenquellen. OSM-Standardkacheln dürfen laut OSMF-Richtlinie nur genutzt werden, wenn der Browser
@@ -729,29 +808,35 @@ const map = L.map("map").setView([51.16,10.45],6); // Startansicht: Deutschland
    Kein Download/Vorladen von Gebieten, kein Offline-Betrieb mit diesen Kacheln. */
 const SOURCES=[
   {name:"OpenStreetMap",url:"https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-   attr:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende',sub:""},
+   attr:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende',sub:"",
+   nameFr:"OpenStreetMap",attrFr:'&copy; contributeurs d&rsquo;<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'},
   {name:"OSM-Daten (CARTO)",url:"https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}.png",
-   attr:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende &copy; <a href="https://carto.com/attributions">CARTO</a>',sub:"abcd"},
+   attr:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende &copy; <a href="https://carto.com/attributions">CARTO</a>',sub:"abcd",
+   nameFr:"Données OSM (CARTO)",attrFr:'&copy; contributeurs d&rsquo;<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/attributions">CARTO</a>'},
   {name:"Wanderkarte (OpenTopoMap)",url:"https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png",
-   attr:'Kartendaten &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende, SRTM | Darstellung &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)',sub:"abc",max:17}
+   attr:'Kartendaten &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>-Mitwirkende, SRTM | Darstellung &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)',sub:"abc",max:17,
+   nameFr:"Carte de randonnée (OpenTopoMap)",attrFr:'Données cartographiques &copy; contributeurs d&rsquo;<a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>, SRTM | Rendu &copy; <a href="https://opentopomap.org">OpenTopoMap</a> (CC-BY-SA)'}
 ];
 // OSM nur, wenn die Seite von einer echten http(s)-Adresse kommt (sonst fehlt der Referer -> OSM sperrt)
 const osmAllowed = /^https?:$/.test(location.protocol) && location.origin!=="null";
 let srcIdx=0, tileOk=0, tileErr=0, tl=null;
+const srcName=c=>(lang==="fr" && c.nameFr) ? c.nameFr : c.name;
+const attrFor=c=>(lang==="fr" && c.attrFr) ? c.attrFr : c.attr;
+function updateTilesLabel(){ $("#bTiles").textContent=tr("map")+": "+srcName(SOURCES[srcIdx]); }
 function setSource(i){
   if(tl) map.removeLayer(tl);
   srcIdx=i; tileOk=0; tileErr=0;
   const c=SOURCES[i];
-  tl=L.tileLayer(c.url,{maxZoom:c.max||19,attribution:c.attr,subdomains:c.sub||"abc"}).addTo(map);
+  tl=L.tileLayer(c.url,{maxZoom:c.max||19,attribution:attrFor(c),subdomains:c.sub||"abc"}).addTo(map);
   tl.on("tileload",()=>{ tileOk++; });
   tl.on("tileerror",()=>{
     tileErr++;
     if(tileOk===0 && tileErr===4){
-      if(srcIdx===0){ status("OpenStreetMap-Kacheln nicht ladbar – wechsle zu CARTO."); setSource(1); }
-      else status("Keine Kartenkacheln ladbar. Bitte Internetverbindung und Browser-Schutzeinstellungen prüfen.");
+      if(srcIdx===0){ status(()=>tr("tOsmFail")); setSource(1); }
+      else status(()=>tr("tNone"));
     }
   });
-  $("#bTiles").textContent="Karte: "+c.name;
+  updateTilesLabel();
 }
 const layer = L.layerGroup().addTo(map);
 
@@ -783,15 +868,15 @@ function redraw(){
   $("#bDraw").classList.toggle("on",drawing);
   $("#bUndo").disabled=$("#bDone").disabled=!drawing;
 }
-$("#bDraw").onclick=()=>{ drawing=true; pts=[]; area=null; LS.set("area",null); wasInside=null; hideAlert(); redraw(); status("Tippe auf die Karte, um die Eckpunkte des Spielbereichs zu setzen. Danach „Fertig“."); };
+$("#bDraw").onclick=()=>{ drawing=true; pts=[]; area=null; LS.set("area",null); wasInside=null; hideAlert(); redraw(); status(()=>tr("sDraw")); };
 $("#bUndo").onclick=()=>{ pts.pop(); redraw(); };
 $("#bDone").onclick=()=>{
-  if(pts.length<3){ status("Bitte mindestens 3 Punkte setzen."); return; }
-  area=pts; pts=[]; drawing=false; LS.set("area",area); wasInside=null; redraw(); status("Spielbereich gespeichert. Starte den Standort, um die Überwachung zu nutzen."); check();
+  if(pts.length<3){ status(()=>tr("sMin3")); return; }
+  area=pts; pts=[]; drawing=false; LS.set("area",area); wasInside=null; redraw(); status(()=>tr("sSaved")); check();
   map.fitBounds(L.polygon(area).getBounds(),{padding:[30,30]});
 };
-$("#bClear").onclick=()=>{ area=null; pts=[]; drawing=false; LS.set("area",null); wasInside=null; hideAlert(); redraw(); status("Spielbereich gelöscht."); };
-$("#bTest").onclick=()=>{ testMode=!testMode; $("#bTest").classList.toggle("on",testMode); status(testMode?"Testmodus: Tippe auf die Karte, um eine Position zu simulieren.":"Testmodus aus."); };
+$("#bClear").onclick=()=>{ area=null; pts=[]; drawing=false; LS.set("area",null); wasInside=null; hideAlert(); redraw(); status(()=>tr("sCleared")); };
+$("#bTest").onclick=()=>{ testMode=!testMode; $("#bTest").classList.toggle("on",testMode); { const on=testMode; status(()=>tr(on?"sTestOn":"sTestOff")); } };
 map.on("click",e=>{
   const p=[e.latlng.lat,e.latlng.lng];
   if(drawing){ pts.push(p); redraw(); }
@@ -810,21 +895,21 @@ $("#cYes").onclick=async()=>{
   startWatch();
 };
 function startWatch(){
-  if(!navigator.geolocation){ status("Dieses Gerät/dieser Browser unterstützt keine Standortbestimmung."); return; }
-  status("Warte auf GPS-Signal …");
+  if(!navigator.geolocation){ status(()=>tr("sNoGeo")); return; }
+  status(()=>tr("sWaitGps"));
   watchId=navigator.geolocation.watchPosition(
     p=>setPos(p.coords.latitude,p.coords.longitude,p.coords.accuracy),
-    err=>status((({1:"Standortzugriff wurde verweigert."+(window.isSecureContext?" Bitte in den Browser-Einstellungen für diese Seite erlauben und die Standortdienste des Geräts einschalten.":" Die Seite läuft nicht über eine sichere Adresse (https). Dann sperrt der Browser den Standort. Bitte die Seite über https aufrufen."),2:"Position nicht verfügbar. Standortdienste des Geräts einschalten, ggf. ins Freie gehen.",3:"Zeitüberschreitung bei der Standortbestimmung. Bitte im Freien erneut versuchen."})[err.code]||"Standortfehler.")+" (Code "+err.code+")"),
+    err=>status(()=>{ const k=err.code===1?(window.isSecureContext?"e1s":"e1i"):({2:"e2",3:"e3"})[err.code]||"eX"; return tr(k)+" ("+tr("code")+" "+err.code+")"; }),
     {enableHighAccuracy:true,maximumAge:2000,timeout:20000}
   );
-  $("#bLoc").textContent="Standort stoppen"; $("#bLoc").classList.add("on");
+  $("#bLoc").classList.add("on"); updateLoc();
   keepAwake();
 }
 function stopWatch(){
   navigator.geolocation.clearWatch(watchId); watchId=null;
-  $("#bLoc").textContent="Standort starten"; $("#bLoc").classList.remove("on");
+  $("#bLoc").classList.remove("on"); updateLoc();
   try{ wl&&wl.release(); }catch(e){} wl=null;
-  status("Standort gestoppt.");
+  status(()=>tr("sStopped"));
 }
 async function keepAwake(){ // Bildschirm anlassen, damit GPS im Vordergrund weiterläuft
   try{ if(navigator.wakeLock) wl=await navigator.wakeLock.request("screen"); }catch(e){}
@@ -847,49 +932,66 @@ $("#bCenter").onclick=()=>{ if(pos) map.setView(pos,Math.max(map.getZoom(),16));
 
 function check(){
   if(!pos){ return; }
-  let txt=`Position: ${pos[0].toFixed(5)}, ${pos[1].toFixed(5)} (±${Math.round(acc)} m)`;
+  let st="noArea";
   if(area){
     const ins=inside(pos,area);
-    txt+=ins?" – im Spielbereich":" – AUSSERHALB des Spielbereichs";
+    st=ins?"inArea":"outArea";
     if(!ins && wasInside!==false) notify(); // nur beim Wechsel nach außen
     if(ins) hideAlert();
     wasInside=ins;
-  }else txt+=" – kein Spielbereich definiert";
-  status(txt);
+  }
+  status(()=>`${tr("pos")}: ${pos[0].toFixed(5)}, ${pos[1].toFixed(5)} (±${Math.round(acc)} m) – ${tr(st)}`);
 }
 
 /* ===== Benachrichtigung ===== */
 function notify(){
-  const msg="Du verlässt den Spielbereich! Böse!!";
+  const msg=tr("leave");
   const a=$("#alert"); a.textContent=msg; a.style.display="block";
   try{ navigator.vibrate&&navigator.vibrate([300,100,300]); }catch(e){}
-  try{ if("Notification" in window && Notification.permission==="granted") new Notification("Spielbereich",{body:msg}); }catch(e){} // nicht überall unterstützt; der rote Balken bleibt als Fallback
+  try{ if("Notification" in window && Notification.permission==="granted") new Notification(tr("notifTitle"),{body:msg}); }catch(e){} // nicht überall unterstützt; der rote Balken bleibt als Fallback
 }
 function hideAlert(){ $("#alert").style.display="none"; }
-function status(t){ $("#status").textContent=t; }
+let lastMsg=null; // letzte Statusmeldung als Funktion, damit sie beim Sprachwechsel neu übersetzt werden kann
+function status(m){ lastMsg=(typeof m==="function")?m:null; $("#status").textContent=(typeof m==="function")?m():m; }
 
-$("#bTiles").onclick=()=>{ const n=(srcIdx+1)%SOURCES.length; if(n===0 && !osmAllowed){ status("OSM-Kacheln sind nur über eine https-Webadresse erlaubt."); setSource(1); return; } setSource(n); };
+$("#bTiles").onclick=()=>{ const n=(srcIdx+1)%SOURCES.length; if(n===0 && !osmAllowed){ status(()=>tr("tOsmOnly")); setSource(1); return; } setSource(n); };
 
 
 /* ===== Diagnose: lädt je Quelle eine Test-Kachel und zeigt das Ergebnis ===== */
 $("#bDiag").onclick=async()=>{
-  let out="Adresse: "+location.href.slice(0,80)+"\nHerkunft: "+location.origin+"\nSichere Seite (https): "+(window.isSecureContext?"ja":"NEIN – Standort wird gesperrt")+"\nOSM erlaubt: "+(osmAllowed?"ja":"nein")+"\nTeste Kacheln …";
+  let out=tr("dAddr")+": "+location.href.slice(0,80)+"\n"+tr("dOrigin")+": "+location.origin+"\n"+tr("dSecure")+": "+(window.isSecureContext?tr("yes"):tr("noSecure"))+"\n"+tr("osmAllowed")+": "+(osmAllowed?tr("yes"):tr("no"))+"\n"+tr("testing");
   status(out);
   for(const c of SOURCES){
     const u=c.url.replace("{s}",(c.sub||"a")[0]).replace("{z}",5).replace("{x}",17).replace("{y}",10);
     const r=await new Promise(res=>{
-      const im=new Image(); const t=setTimeout(()=>res("Zeitüberschreitung"),8000);
-      im.onload=()=>{clearTimeout(t);res("geladen ("+im.naturalWidth+"px)");};
-      im.onerror=()=>{clearTimeout(t);res("FEHLER");};
+      const im=new Image(); const t=setTimeout(()=>res(tr("timeout")),8000);
+      im.onload=()=>{clearTimeout(t);res(tr("loaded")+" ("+im.naturalWidth+"px)");};
+      im.onerror=()=>{clearTimeout(t);res(tr("err"));};
       im.src=u;
     });
-    out+="\n"+c.name+": "+r; status(out);
+    out+="\n"+srcName(c)+": "+r; status(out);
   }
 };
 
+/* ===== Sprachwechsel ===== */
+function updateLoc(){ $("#bLoc").textContent=tr(watchId!==null?"locStop":"locStart"); }
+function applyLang(){
+  document.documentElement.lang=(lang==="fr")?"fr":"de";
+  $("#bLang").textContent=LANG_NAMES[lang];
+  $("#bDraw").textContent=tr("draw"); $("#bUndo").textContent=tr("undo"); $("#bDone").textContent=tr("done");
+  $("#bClear").textContent=tr("clear"); $("#bCenter").textContent=tr("center"); $("#bTest").textContent=tr("test");
+  $("#bDiag").textContent=tr("diag"); updateLoc(); updateTilesLabel();
+  $("#cTitle").textContent=tr("cTitle"); $("#cText").textContent=tr("cText"); $("#cYes").textContent=tr("cYes"); $("#cNo").textContent=tr("cNo");
+  if($("#alert").style.display==="block") $("#alert").textContent=tr("leave");
+  if(tl){ const a=attrFor(SOURCES[srcIdx]); map.attributionControl.removeAttribution(tl.options.attribution); tl.options.attribution=a; map.attributionControl.addAttribution(a); }
+  if(lastMsg) $("#status").textContent=lastMsg();
+}
+$("#bLang").onclick=()=>{ lang=LANGS[(LANGS.indexOf(lang)+1)%LANGS.length]; LS.set("lang",lang); applyLang(); };
+
 /* ===== Start ===== */
 setSource(osmAllowed?0:1);
-if(!osmAllowed) status("Hinweis: Die Standard-OSM-Kacheln sind nur bei Aufruf über eine https-Webadresse erlaubt. Hier wird CARTO (ebenfalls OSM-Daten) genutzt.");
+applyLang(); status(()=>tr("ready"));
+if(!osmAllowed) status(()=>tr("hintOsm"));
 redraw();
 if(area) map.fitBounds(L.polygon(area).getBounds(),{padding:[30,30]});
 </script>
